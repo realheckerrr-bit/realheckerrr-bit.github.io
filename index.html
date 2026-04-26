@@ -6,10 +6,9 @@
     <title>realheckerrr-bit | Aero Station</title>
     <style>
         :root {
-            /* Переконайся, що файл bg.jpg є в твоєму репозиторії */
             --bg-image: url('bg.jpg');
-            --glass: rgba(255, 255, 255, 0.25);
-            --border: rgba(255, 255, 255, 0.4);
+            --glass: rgba(255, 255, 255, 0.2);
+            --border: rgba(255, 255, 255, 0.5);
         }
 
         body {
@@ -23,95 +22,133 @@
             font-family: 'Segoe UI', sans-serif;
             color: white;
             overflow: hidden;
+            position: relative;
         }
 
-        /* Анімовані бульбашки для ефекту Frutiger Aero */
+        /* Ефект глянцевого скла на весь екран */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(165deg, 
+                rgba(255,255,255,0.4) 0%, 
+                rgba(255,255,255,0.1) 40%, 
+                rgba(255,255,255,0) 100%);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* Бульбашки */
         .bubble {
             position: absolute;
-            background: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            bottom: -50px;
+            bottom: -60px;
             z-index: 1;
-            animation: rise 12s infinite linear;
-            box-shadow: inset 0 0 10px rgba(255,255,255,0.5);
+            animation: rise 10s infinite linear;
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.4);
         }
 
         @keyframes rise {
             0% { transform: translateY(0) scale(1); opacity: 0; }
-            10% { opacity: 0.6; }
-            90% { opacity: 0.6; }
-            100% { transform: translateY(-110vh) scale(1.2); opacity: 0; }
+            20% { opacity: 0.5; }
+            80% { opacity: 0.5; }
+            100% { transform: translateY(-110vh) scale(1.3); opacity: 0; }
         }
 
         .container {
             position: relative;
             z-index: 10;
             background: var(--glass);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 2px solid var(--border);
-            border-radius: 35px;
-            padding: 30px;
+            border-radius: 40px;
+            padding: 40px 30px;
             text-align: center;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.35), inset 0 0 25px rgba(255,255,255,0.25);
-            width: 340px;
+            box-shadow: 
+                0 30px 60px rgba(0,0,0,0.3), 
+                inset 0 0 30px rgba(255,255,255,0.3);
+            width: 320px;
+            animation: slideIn 1s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .avatar {
-            width: 110px; height: 110px;
+            width: 120px; height: 120px;
             border-radius: 50%;
             border: 4px solid white;
-            box-shadow: 0 0 25px rgba(255,255,255,0.6);
-            margin-bottom: 10px;
+            box-shadow: 0 0 30px rgba(255,255,255,0.6);
+            margin-bottom: 15px;
         }
 
+        h1 { font-size: 26px; margin: 5px 0; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+
         .description {
-            font-family: monospace;
-            font-size: 13px;
-            background: rgba(0,0,0,0.3);
-            padding: 5px 12px;
-            border-radius: 15px;
-            margin-bottom: 20px;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            background: rgba(0,0,0,0.2);
+            padding: 6px 15px;
+            border-radius: 20px;
+            margin-bottom: 25px;
             display: inline-block;
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
         .btn {
             display: block;
-            margin: 10px 0;
-            padding: 14px;
-            background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(200,230,255,0.9) 100%);
-            color: #0056b3;
+            margin: 15px 0;
+            padding: 15px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(210,230,255,0.85) 100%);
+            color: #004ead;
             text-decoration: none;
-            border-radius: 18px;
+            border-radius: 20px;
             font-weight: bold;
             border: 1px solid white;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
             transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .social-row {
+        .btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            background: white;
+            box-shadow: 0 12px 25px rgba(255,255,255,0.4);
+        }
+
+        .socials {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 15px;
+            margin-top: 10px;
         }
 
         .social-link {
-            background: rgba(255,255,255,0.2);
-            padding: 8px 15px;
-            border-radius: 10px;
+            background: rgba(255,255,255,0.15);
+            padding: 10px 18px;
+            border-radius: 12px;
             text-decoration: none;
             color: white;
-            font-size: 12px;
+            font-size: 13px;
             border: 1px solid var(--border);
+            transition: 0.3s;
         }
 
-        .spotify-widget {
-            margin-top: 25px;
-            border-radius: 15px;
-            overflow: hidden;
-            border: 1px solid var(--border);
-            height: 152px;
+        .social-link:hover {
+            background: rgba(255,255,255,0.35);
+        }
+
+        .footer-text {
+            font-size: 10px;
+            margin-top: 20px;
+            opacity: 0.8;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
@@ -122,20 +159,16 @@
     <div class="container">
         <img src="https://github.com/realheckerrr-bit.png" alt="Avatar" class="avatar">
         <h1>realheckerrr-bit</h1>
-        <div class="description">14 y.o. | Windows / Linux / Android Dev</div>
+        <div class="description">14 y.o. | GSI / Android / Linux dev</div>
 
         <a href="https://github.com/realheckerrr-bit" class="btn" target="_blank">View Projects 📁</a>
         
-        <div class="social-row">
+        <div class="socials">
             <a href="https://t.me/h3cknn" class="social-link" target="_blank">Telegram</a>
             <a href="https://youtube.com/@realheckerr" class="social-link" target="_blank">YouTube</a>
         </div>
 
-        <div class="spotify-widget">
-            <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/2SAnX3l3B728G8qZ77YlUp" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        </div>
-
-        <p style="font-size: 10px; margin-top: 15px; opacity: 0.7;">Discord: real.hecker</p>
+        <p class="footer-text">Discord: real.hecker</p>
     </div>
 
     <script>
@@ -143,15 +176,15 @@
         function createBubble() {
             const b = document.createElement('div');
             b.className = 'bubble';
-            const size = Math.random() * 30 + 10 + 'px';
+            const size = Math.random() * 40 + 15 + 'px';
             b.style.width = size;
             b.style.height = size;
             b.style.left = Math.random() * 100 + '%';
-            b.style.animationDuration = Math.random() * 5 + 8 + 's';
+            b.style.animationDuration = Math.random() * 5 + 7 + 's';
             bContainer.appendChild(b);
-            setTimeout(() => b.remove(), 12000);
+            setTimeout(() => b.remove(), 10000);
         }
-        setInterval(createBubble, 800);
+        setInterval(createBubble, 700);
     </script>
 </body>
 </html>
