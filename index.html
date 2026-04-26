@@ -6,7 +6,7 @@
     <title>realheckerrr-bit | Aero Station</title>
     <style>
         :root {
-            /* Фон зафіксовано, переконайся що bg.jpg є в репозиторії */
+            /* Переконайся, що файл bg.jpg є в твоєму репозиторії */
             --bg-image: url('bg.jpg');
             --glass: rgba(255, 255, 255, 0.25);
             --border: rgba(255, 255, 255, 0.4);
@@ -25,7 +25,7 @@
             overflow: hidden;
         }
 
-        /* Анімовані бульбашки */
+        /* Анімовані бульбашки для ефекту Frutiger Aero */
         .bubble {
             position: absolute;
             background: rgba(255, 255, 255, 0.4);
@@ -55,12 +55,7 @@
             text-align: center;
             box-shadow: 0 25px 60px rgba(0,0,0,0.35), inset 0 0 25px rgba(255,255,255,0.25);
             width: 340px;
-            max-height: 90vh;
-            overflow-y: auto;
-            scrollbar-width: none;
         }
-
-        .container::-webkit-scrollbar { display: none; }
 
         .avatar {
             width: 110px; height: 110px;
@@ -94,8 +89,6 @@
             transition: 0.3s;
         }
 
-        .btn:hover { transform: scale(1.02); background: white; }
-
         .social-row {
             display: flex;
             justify-content: center;
@@ -118,8 +111,7 @@
             border-radius: 15px;
             overflow: hidden;
             border: 1px solid var(--border);
-            height: 152px; /* Фіксована висота, щоб не стрибало */
-            background: rgba(0,0,0,0.1);
+            height: 152px;
         }
     </style>
 </head>
@@ -140,14 +132,13 @@
         </div>
 
         <div class="spotify-widget">
-            <iframe style="border-radius:12px" src="googleusercontent.com/spotify.com/06" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/2SAnX3l3B728G8qZ77YlUp" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
         </div>
 
         <p style="font-size: 10px; margin-top: 15px; opacity: 0.7;">Discord: real.hecker</p>
     </div>
 
     <script>
-        // Скрипт для створення плавних бульбашок
         const bContainer = document.getElementById('bubbles');
         function createBubble() {
             const b = document.createElement('div');
