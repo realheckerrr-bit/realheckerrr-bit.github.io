@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>h3cknn | Bio</title>
+    <title>realheckerrr-bit | Aero Station</title>
     <style>
         :root {
             --bg-image: url('bg.jpg');
@@ -25,6 +25,7 @@
             position: relative;
         }
 
+        /* Ефект глянцевого скла на весь екран */
         body::before {
             content: "";
             position: absolute;
@@ -37,6 +38,7 @@
             z-index: 5;
         }
 
+        /* Бульбашки */
         .bubble {
             position: absolute;
             background: rgba(255, 255, 255, 0.3);
@@ -148,6 +150,26 @@
             opacity: 0.8;
             letter-spacing: 0.5px;
         }
+
+        /* Анімація для кота */
+        .running-cat {
+            position: fixed;
+            bottom: 10px; /* Відстань від низу екрана */
+            width: 120px; /* Розмір кота */
+            z-index: 9999; /* Щоб кіт був поверх усього */
+            animation: runCat 14s linear infinite;
+            pointer-events: none; /* Щоб він не заважав натискати на кнопки */
+        }
+
+        @keyframes runCat {
+            /* Біжить вправо (віддзеркалений) */
+            0% { left: -150px; transform: scaleX(-1); }
+            49% { left: 100vw; transform: scaleX(-1); }
+            /* Розворот і біжить вліво (оригінальний напрямок) */
+            50% { left: 100vw; transform: scaleX(1); }
+            99% { left: -150px; transform: scaleX(1); }
+            100% { left: -150px; transform: scaleX(-1); }
+        }
     </style>
 </head>
 <body>
@@ -156,7 +178,7 @@
 
     <div class="container">
         <img src="https://github.com/realheckerrr-bit.png" alt="Avatar" class="avatar">
-        <h1>h3cknn</h1>
+        <h1>realheckerrr-bit</h1>
         <div class="description">14 y.o. | GSI / Android / Linux dev</div>
 
         <a href="https://github.com/realheckerrr-bit" class="btn" target="_blank">View Projects 📁</a>
@@ -169,7 +191,10 @@
         <p class="footer-text">Discord: real.hecker</p>
     </div>
 
+    <img src="141.png" alt="Running Cat" class="running-cat">
+
     <script>
+        // Скрипт для бульбашок
         const bContainer = document.getElementById('bubbles');
         function createBubble() {
             const b = document.createElement('div');
