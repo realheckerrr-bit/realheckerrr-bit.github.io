@@ -33,7 +33,7 @@
 
   .terminal{
     width: 100%;
-    max-width: 720px;
+    max-width: 1040px;
     background: var(--bg-panel);
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -152,6 +152,90 @@
   }
   .links a:hover{ color: var(--accent); border-color: var(--accent); }
 
+  .data-section{ margin-top: 22px; }
+  .repo-grid{
+    display:grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 8px 0 4px;
+  }
+  .repo-card{
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+    min-height:148px;
+    padding: 14px;
+    border:1px solid var(--border);
+    border-radius:7px;
+    background:#12161f;
+  }
+  .repo-card:hover{ border-color:rgba(127,176,105,0.55); }
+  .repo-name{
+    color:var(--accent);
+    font-size:14px;
+    font-weight:600;
+    text-decoration:none;
+    overflow-wrap:anywhere;
+  }
+  .repo-name:hover{ text-decoration:underline; }
+  .repo-description{
+    flex:1;
+    margin:8px 0 12px;
+    color:var(--text);
+    font-size:12.5px;
+    line-height:1.5;
+  }
+  .repo-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 12px;
+    color:var(--dim);
+    font-size:11.5px;
+  }
+  .repo-language{ color:var(--accent2); }
+  .commit-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-top:8px;
+  }
+  .commit-item{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    min-width:0;
+    padding:9px 11px;
+    border-left:2px solid var(--border);
+    background:#12161f;
+  }
+  .commit-item:hover{ border-left-color:var(--accent); }
+  .commit-sha{
+    flex-shrink:0;
+    color:var(--accent2);
+    font-size:11.5px;
+    text-decoration:none;
+  }
+  .commit-message{
+    min-width:0;
+    overflow:hidden;
+    color:var(--text);
+    font-size:12.5px;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .commit-repo{
+    flex-shrink:0;
+    margin-left:auto;
+    color:var(--dim);
+    font-size:11px;
+  }
+  .state{
+    padding:10px 0;
+    color:var(--dim);
+    font-size:12.5px;
+  }
+  .state.error{ color:var(--accent3); }
+
   .cursor{
     display:inline-block;
     width: 8px;
@@ -175,6 +259,13 @@
     .body{ padding: 20px 16px 24px; font-size: 13.5px; }
     .avatar{ width: 64px; height: 64px; }
     table.fields td.k{ width: 92px; }
+    .repo-grid{ grid-template-columns:1fr; }
+    .commit-item{ display:block; }
+    .commit-repo{ display:block; margin:3px 0 0; }
+  }
+
+  @media (min-width: 481px) and (max-width: 760px){
+    .repo-grid{ grid-template-columns:1fr; }
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -226,11 +317,138 @@
         <a href="https://t.me/h3cknn" target="_blank" rel="noopener">Telegram →</a>
       </div>
 
+      <section class="data-section" aria-labelledby="repositories-heading">
+        <div class="line" id="repositories-heading"><span class="prompt">guest@shell</span><span class="cmd">:~$ gh repo list --limit 6</span></div>
+        <div id="repo-grid" class="repo-grid" aria-live="polite">
+          <div class="state">fetching public repositories...</div>
+        </div>
+      </section>
+
+      <section class="data-section" aria-labelledby="commits-heading">
+        <div class="line" id="commits-heading"><span class="prompt">guest@shell</span><span class="cmd">:~$ git log --all --oneline -6</span></div>
+        <div id="commit-list" class="commit-list" aria-live="polite">
+          <div class="state">fetching recent commits...</div>
+        </div>
+      </section>
+
       <div class="line" style="margin-top:18px;"><span class="prompt">guest@shell</span><span class="cmd">:~$</span><span class="cursor"></span></div>
 
-      <div class="footer-note">avatar synced live from GitHub profile</div>
+      <div class="footer-note">avatar, repositories and commits synced live from GitHub</div>
     </div>
   </div>
+
+  <script>
+    const githubUser = 'realheckerrr-bit';
+    const githubApi = 'https://api.github.com';
+    const repoGrid = document.getElementById('repo-grid');
+    const commitList = document.getElementById('commit-list');
+
+    const createElement = (tag, className, text) => {
+      const element = document.createElement(tag);
+      if (className) element.className = className;
+      if (text !== undefined) element.textContent = text;
+      return element;
+    };
+
+    const githubRequest = async (path) => {
+      const response = await fetch(`${githubApi}${path}`, {
+        headers: { Accept: 'application/vnd.github+json' }
+      });
+      if (!response.ok) throw new Error(`GitHub API returned ${response.status}`);
+      return response.json();
+    };
+
+    const formatCount = (value) => new Intl.NumberFormat('en', { notation: 'compact' }).format(value || 0);
+
+    const formatDate = (date) => {
+      const time = new Date(date).getTime();
+      const days = Math.floor((Date.now() - time) / 86400000);
+      if (days < 1) return 'today';
+      if (days === 1) return '1 day ago';
+      if (days < 30) return `${days} days ago`;
+      return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(date));
+    };
+
+    const showState = (container, message, isError = false) => {
+      container.replaceChildren(createElement('div', `state${isError ? ' error' : ''}`, message));
+    };
+
+    const renderRepositories = (repos) => {
+      repoGrid.replaceChildren();
+      repos.forEach((repo) => {
+        const card = createElement('article', 'repo-card');
+        const name = createElement('a', 'repo-name', repo.name);
+        name.href = repo.html_url;
+        name.target = '_blank';
+        name.rel = 'noopener';
+
+        const description = createElement('p', 'repo-description', repo.description || 'No description yet.');
+        const meta = createElement('div', 'repo-meta');
+        if (repo.language) meta.append(createElement('span', 'repo-language', repo.language));
+        meta.append(createElement('span', '', `★ ${formatCount(repo.stargazers_count)}`));
+        meta.append(createElement('span', '', `⑂ ${formatCount(repo.forks_count)}`));
+        meta.append(createElement('span', '', `updated ${formatDate(repo.updated_at)}`));
+
+        card.append(name, description, meta);
+        repoGrid.append(card);
+      });
+    };
+
+    const renderCommits = (commits) => {
+      commitList.replaceChildren();
+      commits.forEach(({ repo, commit }) => {
+        const item = createElement('article', 'commit-item');
+        const sha = createElement('a', 'commit-sha', commit.sha.slice(0, 7));
+        sha.href = commit.html_url;
+        sha.target = '_blank';
+        sha.rel = 'noopener';
+        sha.title = commit.sha;
+        const message = createElement('span', 'commit-message', commit.commit.message.split('\n')[0]);
+        message.title = commit.commit.message;
+        const commitDate = commit.commit.author?.date || commit.commit.committer?.date;
+        const repoName = createElement('span', 'commit-repo', `${repo.name} · ${formatDate(commitDate)}`);
+        item.append(sha, message, repoName);
+        commitList.append(item);
+      });
+    };
+
+    const loadGitHubData = async () => {
+      try {
+        const repos = (await githubRequest(`/users/${githubUser}/repos?per_page=6&sort=updated&type=owner`))
+          .filter((repo) => !repo.fork);
+        if (!repos.length) {
+          showState(repoGrid, 'no public repositories found.');
+          showState(commitList, 'no recent commits found.');
+          return;
+        }
+        renderRepositories(repos);
+
+        const commitGroups = await Promise.all(repos.slice(0, 4).map(async (repo) => {
+          try {
+            const commits = await githubRequest(`/repos/${githubUser}/${encodeURIComponent(repo.name)}/commits?per_page=3`);
+            return commits.map((commit) => ({ repo, commit }));
+          } catch {
+            return [];
+          }
+        }));
+        const commits = commitGroups.flat()
+          .sort((a, b) => {
+            const dateA = a.commit.commit.author?.date || a.commit.committer?.date;
+            const dateB = b.commit.commit.author?.date || b.commit.committer?.date;
+            return new Date(dateB) - new Date(dateA);
+          })
+          .slice(0, 6);
+        if (commits.length) renderCommits(commits);
+        else showState(commitList, 'no recent commits found.');
+      } catch (error) {
+        showState(repoGrid, 'unable to load repositories right now.', true);
+        showState(commitList, 'unable to load commits right now.', true);
+        console.error(error);
+      }
+    };
+
+    loadGitHubData();
+  </script>
 
 </body>
 </html>
