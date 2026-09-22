@@ -287,6 +287,7 @@
     border-top: 1px dashed var(--border);
     padding-top: 12px;
   }
+  .sync-status{ color:var(--accent); }
 
   @media (max-width: 480px){
     .body{ padding: 20px 16px 24px; font-size: 13.5px; }
@@ -350,7 +351,7 @@
       </div>
 
       <section class="data-section" aria-labelledby="repositories-heading">
-        <div class="line" id="repositories-heading"><span class="prompt">guest@shell</span><span class="cmd">:~$ gh repo list --limit 6</span></div>
+        <div class="line" id="repositories-heading"><span class="prompt">guest@shell</span><span class="cmd">:~$ gh repo list --limit 100</span></div>
         <div id="repo-grid" class="repo-grid" aria-live="polite">
           <div class="state">fetching public repositories...</div>
         </div>
@@ -383,7 +384,7 @@
 
       <div class="line" style="margin-top:18px;"><span class="prompt">guest@shell</span><span class="cmd">:~$</span><span class="cursor"></span></div>
 
-      <div class="footer-note">avatar, repositories and contributions synced live from GitHub</div>
+      <div class="footer-note">avatar, repositories and contributions synced live from GitHub · <span id="sync-status" class="sync-status">syncing...</span></div>
     </div>
   </div>
 
@@ -394,6 +395,7 @@
     const contributionSummary = document.getElementById('contribution-summary');
     const contributionMonths = document.getElementById('contribution-months');
     const contributionGrid = document.getElementById('contribution-grid');
+    const syncStatus = document.getElementById('sync-status');
 
     const createElement = (tag, className, text) => {
       const element = document.createElement(tag);
@@ -404,6 +406,7 @@
 
     const githubRequest = async (path) => {
       const response = await fetch(`${githubApi}${path}`, {
+        cache: 'no-store',
         headers: { Accept: 'application/vnd.github+json' }
       });
       if (!response.ok) throw new Error(`GitHub API returned ${response.status}`);
@@ -507,34 +510,52 @@
 
     const loadRepositories = async () => {
       try {
-        const repos = (await githubRequest(`/users/${githubUser}/repos?per_page=6&sort=updated&type=owner`))
+        const repos = (await githubRequest(`/users/${githubUser}/repos?per_page=100&sort=updated&type=owner`))
           .filter((repo) => !repo.fork);
         if (!repos.length) {
           showState(repoGrid, 'no public repositories found.');
-          return;
+          return true;
         }
         renderRepositories(repos);
+        return true;
       } catch (error) {
         showState(repoGrid, 'unable to load repositories right now.', true);
         console.error(error);
+        return false;
       }
     };
 
     const loadContributions = async () => {
       try {
-        const response = await fetch(`https://github-contributions-api.jogruber.de/v4/${githubUser}?y=last`);
+        const response = await fetch(`https://github-contributions-api.jogruber.de/v4/${githubUser}?y=last`, {
+          cache: 'no-store'
+        });
         if (!response.ok) throw new Error(`Contributions API returned ${response.status}`);
         const data = await response.json();
         renderContributions(data.contributions || [], data.total?.lastYear);
+        return true;
       } catch (error) {
         contributionSummary.textContent = 'contributions unavailable right now.';
         showState(contributionGrid, 'unable to load contributions right now.', true);
         console.error(error);
+        return false;
       }
     };
 
-    loadRepositories();
-    loadContributions();
+    const syncGitHubData = async () => {
+      syncStatus.textContent = 'syncing...';
+      const results = await Promise.all([loadRepositories(), loadContributions()]);
+      const syncedAt = new Intl.DateTimeFormat('en', {
+        hour: 'numeric',
+        minute: '2-digit'
+      }).format(new Date());
+      syncStatus.textContent = results.every(Boolean)
+        ? `last synced ${syncedAt}`
+        : `sync incomplete · retrying at next refresh`;
+    };
+
+    syncGitHubData();
+    window.setInterval(syncGitHubData, 15 * 60 * 1000);
   </script>
 
 </body>
