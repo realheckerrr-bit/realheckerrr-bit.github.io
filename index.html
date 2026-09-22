@@ -440,6 +440,7 @@
         const description = createElement('p', 'repo-description', repo.description || 'No description yet.');
         const meta = createElement('div', 'repo-meta');
         if (repo.language) meta.append(createElement('span', 'repo-language', repo.language));
+        if (repo.fork) meta.append(createElement('span', '', 'fork'));
         meta.append(createElement('span', '', `★ ${formatCount(repo.stargazers_count)}`));
         meta.append(createElement('span', '', `⑂ ${formatCount(repo.forks_count)}`));
         meta.append(createElement('span', '', `updated ${formatDate(repo.updated_at)}`));
@@ -510,8 +511,7 @@
 
     const loadRepositories = async () => {
       try {
-        const repos = (await githubRequest(`/users/${githubUser}/repos?per_page=100&sort=updated&type=owner`))
-          .filter((repo) => !repo.fork);
+        const repos = await githubRequest(`/users/${githubUser}/repos?per_page=100&sort=updated&type=owner`);
         if (!repos.length) {
           showState(repoGrid, 'no public repositories found.');
           return true;
